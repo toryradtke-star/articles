@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Runs the article tool from anywhere: art help
+DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+exec "$DIR/node_modules/.bin/tsx" "$DIR/src/cli.ts" "$@"
