@@ -6,7 +6,7 @@ excerpt: At a keycard gym with no staff, you let yourself in with your own key, 
 metaTitle: What to Expect at an Unstaffed Keycard Gym
 metaDescription: "How a 24-hour keycard gym with no staff, classes, or trainers works: getting in, equipment, costs, and who it fits. Workout 24/7 in Wells and Osakis, MN."
 request: What to Expect at a Keycard Gym With No Staff, Classes, or Trainers
-status: draft
+status: published
 score: 9.6
 issues:
   - Remove the '## Frequently asked questions' section from the body text and put those Q&As in the separate "faq" field, so they aren't duplicated.
@@ -14,6 +14,9 @@ issues:
   - The closing call to action 'then call or stop in to get your key' could also point to the [how to join page](/join), or end with a single strongest CTA, so the next step is unmistakable.
   - In 'Who is a keycard gym without staff a good fit for?', the safety advice 'let someone at home know when you're heading to the gym late at night' is fine as general advice, but keep it clearly framed as a tip and not as a Workout 24/7 policy.
 written: 2026-10-07
+sanityId: art-w247-what-to-expect-keycard-gym-no-staff
+url: https://workout247fitness.com/blog/what-to-expect-keycard-gym-no-staff
+publishedAt: 2026-10-07T15:55:16.813Z
 ---
 
 At a keycard gym with no staff, classes, or trainers, you let yourself in with your own key whenever you want, use the weights and cardio machines on your own, and leave when you're done. Nobody checks you in, nobody leads a class, and nobody tells you what to do next. You bring the plan; the gym provides the room and the equipment.
