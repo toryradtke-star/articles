@@ -199,7 +199,7 @@ ${RUBRIC.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
 For each criterion give the name, a score and a one-sentence note. Then list "issues": concrete fixes the writer should make, quoting the problem text where possible. Flag any link not in the allowed list and any fact not supported by the site facts. Empty list if nothing needs fixing.
 
-The article is in markdown: "## " and "### " lines are real headings, and links are [text](href).
+The article is in markdown: "## " and "### " lines are real headings, and links are [text](href). The final "## ${FAQ_HEADING}" section is the "faq" field rendered for reading, not a duplicate of it.
 
 Article (${wordCount(a.body)} words):
 Title: ${a.title}
