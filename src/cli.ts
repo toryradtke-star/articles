@@ -173,7 +173,7 @@ async function main() {
 
   if (command === 'publish') {
     const live = Boolean(opt.live)
-    const signer = opt['signed-off-by'] ?? meta.signedOffBy
+    const signer = (opt['signed-off-by'] ?? meta.signedOffBy)?.replace(/\s+/g, ' ').trim() || undefined
     if (live && site.requiresClinicalSignoff && meta.claims?.length && !signer) {
       throw new Error(`${site.name} articles need a clinician's OK first. Send them: art claims ${site.id} ${meta.slug}\nThen: art publish ${site.id} ${meta.slug} --live --signed-off-by "Name, DPT"`)
     }

@@ -6,7 +6,7 @@ excerpt: Virtual physical therapy can work well for many people. Here's what hap
 metaTitle: Can Virtual Physical Therapy Work? What to Expect
 metaDescription: What a telehealth PT visit looks like, who virtual physical therapy may suit, and when in-person care in Superior, WI is the better choice.
 request: Can Virtual Physical Therapy Actually Work? What a Telehealth PT Visit Looks Like
-status: draft
+status: published
 score: 9.5
 issues:
   - 'Unflagged clinical/outcome sentence: "Seeing you at home can also be an advantage." Add it to claims or merge it into the flagged sentence that follows.'
@@ -40,6 +40,12 @@ claims:
   - If you have sudden severe pain, spreading numbness or weakness, loss of bladder or bowel control, chest pain, or symptoms after a significant fall or accident, seek urgent medical care rather than booking a physical therapy visit.
   - For many people, virtual PT built around exercise, movement coaching, and education can be a helpful option, though results vary and hands-on treatments such as dry needling, cupping, and manual therapy still require an in-person visit.
 written: 2026-10-07
+signedOffBy: |-
+  Blake 
+    Radtke, DPT
+sanityId: art-omnia-does-virtual-physical-therapy-work
+url: https://omniatherapies.com/news/does-virtual-physical-therapy-work
+publishedAt: 2026-10-07T16:42:03.490Z
 ---
 
 Yes, for many people virtual physical therapy can work well, especially when the care is built around movement assessment, exercise, and education rather than hands-on treatment. A telehealth PT visit is a live, one-on-one video session where a Doctor of Physical Therapy talks through your symptoms, watches you move, and coaches you through a plan you can do at home.
