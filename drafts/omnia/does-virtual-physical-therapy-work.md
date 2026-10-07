@@ -40,9 +40,7 @@ claims:
   - If you have sudden severe pain, spreading numbness or weakness, loss of bladder or bowel control, chest pain, or symptoms after a significant fall or accident, seek urgent medical care rather than booking a physical therapy visit.
   - For many people, virtual PT built around exercise, movement coaching, and education can be a helpful option, though results vary and hands-on treatments such as dry needling, cupping, and manual therapy still require an in-person visit.
 written: 2026-10-07
-signedOffBy: |-
-  Blake 
-    Radtke, DPT
+signedOffBy: Blake Radtke, DPT
 sanityId: art-omnia-does-virtual-physical-therapy-work
 url: https://omniatherapies.com/news/does-virtual-physical-therapy-work
 publishedAt: 2026-10-07T16:42:03.490Z
