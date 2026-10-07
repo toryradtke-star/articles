@@ -1,7 +1,7 @@
 import { ROOT } from './env.ts'
 import { existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { parseArgs } from 'node:util'
+import { parseArgs, type ParseArgsConfig } from 'node:util'
 import { articlePath, findArticle, listArticles, saveArticle, wordCount, type Meta } from './markdown.ts'
 import { publishArticle } from './publish.ts'
 import { siteContext } from './sanity.ts'
@@ -23,7 +23,17 @@ Sites: ${Object.values(SITES).map((s) => `${s.id} (${s.name})`).join(', ')}
 Articles are markdown files in ${relative(process.cwd(), join(ROOT, 'drafts')) || 'drafts'}/<site>/. Edit them freely.
 Slugs can be shortened to any unique start, e.g. "art check w247 is-it-safe".`
 
-const { values: opt, positionals } = parseArgs({
+function parseCli<T extends ParseArgsConfig>(config: T) {
+  try {
+    return parseArgs(config)
+  } catch (err) {
+    // e.g. a pasted command that wrapped and cut off --signed-off-by's value
+    console.error(`${err instanceof Error ? err.message : String(err)}\nKeep the whole command on one line, with quotes around names. Run: art help`)
+    process.exit(1)
+  }
+}
+
+const { values: opt, positionals } = parseCli({
   allowPositionals: true,
   options: {
     notes: { type: 'string' },
