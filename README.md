@@ -69,11 +69,12 @@ A slug can be any unique prefix: `art check w247 what-to`.
 | File | What it does |
 |---|---|
 | `src/sites.ts` | Per-site config: Sanity project, article type, writing rules, the GROQ query for facts, the pages articles may link to |
-| `src/writer.ts` | Prompts, `write`, `score`, `suggestIdeas`. Structured output via Zod, adaptive thinking, `claude-opus-5-5` |
+| `src/writer.ts` | Prompts, `write`, `score`, `suggestIdeas`. Calls `claude -p` (Claude Code CLI) with a JSON schema, `claude-opus-5-5` |
 | `src/markdown.ts` | Front matter, FAQ split, markdown → Portable Text |
 | `src/publish.ts` | Sanity write as a Studio draft or live, slug-clash check |
 | `src/cli.ts` | The commands |
 
-TypeScript on Node 22, run with tsx; no build step. Needs `ANTHROPIC_API_KEY`
+TypeScript on Node 22, run with tsx; no build step. Needs the Claude Code CLI
+logged in (`claude auth login`; it runs on that account's subscription, no API key)
 and a Sanity write token per site (`SANITY_WRITE_TOKEN_<SITE>`) in `.env`.
 Adding a site is one entry in `src/sites.ts`.

@@ -1,18 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk'
-import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
+import { spawn } from 'node:child_process'
+import { tmpdir } from 'node:os'
 import { z } from 'zod'
 import { FAQ_HEADING, wordCount } from './markdown.ts'
 import type { SiteContext } from './sanity.ts'
 import type { Site } from './sites.ts'
 
 export const MODEL = 'claude-opus-5-5'
-
-// Org-level API keys must name a workspace on every request.
-const client = new Anthropic({
-  defaultHeaders: process.env.ANTHROPIC_WORKSPACE_ID
-    ? { 'anthropic-workspace-id': process.env.ANTHROPIC_WORKSPACE_ID }
-    : undefined,
-})
 
 // Length limits are checked after parsing; output schemas support only a subset of JSON Schema.
 const DraftSchema = z.object({
@@ -84,7 +77,7 @@ ${site.brandRules.join('\n')}
 Facts about the business (from its website). These are the only facts you may state about the business itself. If something isn't here, don't claim it:
 ${JSON.stringify(ctx.facts, null, 2)}
 
-Pages you may link to, as markdown links like [text](/path). Do not link anywhere else on this site, and avoid external links:
+Pages you may link to, as markdown links like [text](/path). Do not link anywhere else on this site. Avoid external links, with one exception: when the article states a law, regulation or government rule, cite it with a link to the official government source (a state legislature, revisor or .gov page) right where the rule is described:
 ${ctx.routes.map((r) => `${r.path} - ${r.what}`).join('\n')}
 
 Format:
@@ -98,35 +91,58 @@ Format:
 - Write for a person deciding what to do, not for a search engine. No filler intros, no "in conclusion".${clinical}`
 }
 
-/** Streams a structured request and returns the parsed object plus usage. */
+/**
+ * Runs a structured request through the Claude Code CLI (`claude -p`), so it bills
+ * to Tory's claude.ai subscription instead of an API key. Returns the parsed object plus usage.
+ */
 async function structured<T extends z.ZodType>(
   schema: T,
   params: { system: string; user: string; effort: 'medium' | 'high' },
 ): Promise<{ data: z.infer<T> } & Usage> {
-  const stream = client.beta.messages.stream({
-    model: MODEL,
-    max_tokens: 32000,
-    // Refusals re-run on Anthropic's recommended fallback model in the same call.
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    thinking: { type: 'adaptive' },
-    output_config: { effort: params.effort, format: betaZodOutputFormat(schema) },
-    system: [{ type: 'text', text: params.system, cache_control: { type: 'ephemeral' } }],
-    messages: [{ role: 'user', content: params.user }],
+  const args = [
+    '-p',
+    '--model', MODEL,
+    '--effort', params.effort,
+    '--system-prompt', params.system,
+    '--json-schema', JSON.stringify(z.toJSONSchema(schema, { target: 'draft-07' })),
+    '--output-format', 'json',
+    '--tools', '',
+    '--strict-mcp-config',
+    '--setting-sources', '',
+    '--no-session-persistence',
+  ]
+  // An API key in the environment would take priority over the subscription login.
+  const { ANTHROPIC_API_KEY: _key, ANTHROPIC_WORKSPACE_ID: _ws, ...env } = process.env
+  const out = await new Promise<string>((resolve, reject) => {
+    const child = spawn('claude', args, {
+      cwd: tmpdir(),
+      env: { ...env, CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1' },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+    let stdout = ''
+    let stderr = ''
+    child.stdout.on('data', (d) => (stdout += d))
+    child.stderr.on('data', (d) => (stderr += d))
+    child.on('error', (e) => reject(new Error(`Could not run the claude CLI: ${e.message}`)))
+    child.on('close', (code) => (code === 0 ? resolve(stdout) : reject(new Error(`claude exited with ${code}: ${(stderr || stdout).trim().slice(0, 500)}`))))
+    child.stdin.end(params.user)
   })
-  const message = await stream.finalMessage()
 
-  if (message.stop_reason === 'refusal') {
-    throw new Error(`Claude declined this request${message.stop_details?.category ? ` (${message.stop_details.category})` : ''}.`)
+  let result: any
+  try {
+    result = JSON.parse(out)
+  } catch {
+    throw new Error(`claude returned something that was not JSON: ${out.slice(0, 300)}`)
   }
-  if (message.stop_reason === 'max_tokens') throw new Error('The response ran past the length limit.')
-  if (!message.parsed_output) throw new Error('Claude returned something that did not match the expected shape.')
+  if (result.is_error) throw new Error(`Claude failed: ${result.result ?? result.subtype}`)
+  const parsed = schema.safeParse(result.structured_output)
+  if (!parsed.success) throw new Error('Claude returned something that did not match the expected shape.')
 
-  const u = message.usage
+  const u = result.usage ?? {}
   return {
-    data: message.parsed_output as z.infer<T>,
-    inputTokens: u.input_tokens + (u.cache_creation_input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0),
-    outputTokens: u.output_tokens,
+    data: parsed.data as z.infer<T>,
+    inputTokens: (u.input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0),
+    outputTokens: u.output_tokens ?? 0,
   }
 }
 
@@ -197,7 +213,7 @@ export async function score(site: Site, ctx: SiteContext, a: Omit<Written, 'exce
   const user = `You are now reviewing an article written with the instructions above. Grade it strictly, 0 to 10, on each criterion:
 ${RUBRIC.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
-For each criterion give the name, a score and a one-sentence note. Then list "issues": concrete fixes the writer should make, quoting the problem text where possible. Flag any link not in the allowed list and any fact not supported by the site facts. Empty list if nothing needs fixing.
+For each criterion give the name, a score and a one-sentence note. Then list "issues": concrete fixes the writer should make, quoting the problem text where possible. Flag any link not in the allowed list and any fact not supported by the site facts. A link to an official government source (state statute, administrative code, .gov) that cites a law the article states is allowed and is a plus; flag any other external link. Empty list if nothing needs fixing.
 
 The article is in markdown: "## " and "### " lines are real headings, and links are [text](href). The final "## ${FAQ_HEADING}" section is the "faq" field rendered for reading, not a duplicate of it.
 

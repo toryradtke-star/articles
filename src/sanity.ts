@@ -20,6 +20,9 @@ export function writer(site: Site): SanityClient {
     apiVersion: '2025-02-19',
     token,
     useCdn: false,
+    // API 2025-02-19 defaults to the published perspective, which hides drafts.
+    // publish.ts needs to see Studio drafts (to keep their photos and catch slug clashes).
+    perspective: 'raw',
   })
 }
 

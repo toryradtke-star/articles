@@ -37,6 +37,11 @@ export async function publishArticle(site: Site, article: Article, live: boolean
     // blogPost has no FAQ field, so the Q&A stays at the end of the body.
     doc.body = toPortableText(article.body, resolve)
     doc.author = meta.signedOffBy ?? site.name
+    // Shown on the page as "Clinically reviewed by" and in its MedicalWebPage reviewedBy data.
+    if (meta.signedOffBy) {
+      doc.reviewedBy = meta.signedOffBy
+      doc.reviewedAt = new Date().toISOString()
+    }
   } else {
     doc.body = toPortableText(main, resolve)
     doc.faq = faq.map((qa, i) => ({ _type: 'qa', _key: `qa${i}`, ...qa }))
